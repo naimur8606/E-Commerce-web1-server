@@ -26,7 +26,6 @@ async function run() {
 
     const allProducts = client.db("sobDokanderDB").collection("products");
     const categories = client.db("sobDokanderDB").collection("categories");
-    const carousel = client.db("sobDokanderDB").collection("carousel");
 
     app.get("/products", async (req, res) => {
       const cursor = allProducts.find();
