@@ -26,6 +26,7 @@ async function run() {
 
     const allProducts = client.db("sobDokanderDB").collection("products");
     const categories = client.db("sobDokanderDB").collection("categories");
+    const allUsers = client.db('coffeeDB').collection('user');
 
     app.get("/products", async (req, res) => {
       const cursor = allProducts.find();
@@ -54,26 +55,64 @@ async function run() {
       const updatedProduct = req.body;
 
       const product = {
-          $set: {
-              name: updatedProduct.name,
-              brand_name: updatedProduct.brand_name,
-              category: updatedProduct.category,
-              price: updatedProduct.price,
-              rating: updatedProduct.rating,
-              photo: updatedProduct.photo,
-              description: updatedProduct.description
-          }
+        $set: {
+          name: updatedProduct.name,
+          brand_name: updatedProduct.brand_name,
+          category: updatedProduct.category,
+          price: updatedProduct.price,
+          rating: updatedProduct.rating,
+          photo: updatedProduct.photo,
+          description: updatedProduct.description
+        }
       }
 
       const result = await allProducts.updateOne(filter, product, options);
       res.send(result);
-  })
+    })
 
     app.get("/categories", async (req, res) => {
       const cursor = categories.find();
       const result = await cursor.toArray();
       res.send(result)
     })
+
+
+    app.get('/user', async (req, res) => {
+      const cursor = allUsers.find();
+      const users = await cursor.toArray();
+      res.send(users);
+    })
+
+    app.post('/user', async (req, res) => {
+      const user = req.body;
+      const email = user?.email;
+      const existingUser = await allUsers.findOne({ email });
+      if (!existingUser) {
+        console.log(user);
+        const result = await allUsers.insertOne(user);
+        res.send(result);
+      }
+    });
+
+    app.get("/user/:id", async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) };
+      const result = await allUsers.findOne(query);
+      res.send(result)
+    })
+
+    app.patch('/user', async (req, res) => {
+      const user = req.body;
+      const filter = { email: user.email }
+      const updateDoc = {
+          $set: {
+              lastLoggedAt: user.lastLoggedAt
+          }
+      }
+      const result = await allUsers.updateOne(filter, updateDoc);
+      res.send(result);
+    })
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
