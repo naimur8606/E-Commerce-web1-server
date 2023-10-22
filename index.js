@@ -94,7 +94,17 @@ async function run() {
       res.send(result)
     })
 
-    
+    app.patch('/user', async (req, res) => {
+      const user = req.body;
+      const filter = { email: user.email }
+      const updateDoc = {
+          $set: {
+              cartProduct: user.cartProduct
+          }
+      }
+      const result = await allUsers.updateOne(filter, updateDoc);
+      res.send(result);
+    })
 
 
 
